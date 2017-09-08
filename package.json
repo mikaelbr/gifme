@@ -1,22 +1,26 @@
 {
-  "name": "electron-quick-start",
-  "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "name": "gifme",
+  "private": true,
+  "version": "0.1.0",
+  "description": "",
   "main": "main.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "bsb -make-world",
+    "clean": "bsb -clean-world",
+    "watch": "bsb -make-world -w",
     "start": "electron ."
   },
-  "repository": "https://github.com/electron/electron-quick-start",
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
-  ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "keywords": [],
+  "author": "Mikael Brevik <mikaelbre@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "reason-react": ">=0.2.1"
+  },
   "devDependencies": {
-    "electron": "~1.6.2"
+    "electron": "~1.6.2",
+    "bs-platform": "^1.9.1"
   }
 }
