@@ -1,61 +1,55 @@
-/* This is a stateful component. In ReasonReact, we call them reducer components */
-/* A list of state transitions, to be used in self.reduce and reducer */
-let tickTimeInMs = 10;
-
-let msInSec = 1000;
-
-let seconds = 10;
-
-let rest = msInSec / tickTimeInMs;
-
-let totalCount = seconds * rest * tickTimeInMs;
-
 type action =
-  | Tick;
+  | SetImage string
+  | RemoveImage;
 
 /* The component's state type. It can be anything, including, commonly, being a record type */
-type state = {
-  total: int,
-  timerId: ref (option Js.Global.intervalId)
-};
+type state = {image: option string};
 
-let component = ReasonReact.reducerComponent "Counter";
+let component = ReasonReact.reducerComponent "App";
+
+let setImage img _self => SetImage img;
+
+let ipcSend = Electron.IpcRenderer.send Electron.ipcRenderer;
+
+let ipcOn = Electron.IpcRenderer.on Electron.ipcRenderer;
+
+let sendCommand command _e => ipcSend command "foo";
 
 let make _children => {
   ...component,
-  initialState: fun () => {total: totalCount, timerId: ref None},
-  reducer: fun action state =>
+  initialState: fun () => {image: None},
+  reducer: fun action _state =>
     switch action {
-    | Tick =>
-      if (state.total <= 0) {
-        switch !state.timerId {
-        | Some id => Js.Global.clearInterval id
-        | _ => ()
-        };
-        ReasonReact.NoUpdate
-      } else {
-        ReasonReact.Update {...state, total: state.total - tickTimeInMs}
-      }
+    | SetImage str => ReasonReact.Update {image: Some str}
+    | RemoveImage => ReasonReact.Update {image: None}
     },
   didMount: fun self => {
-    self.state.timerId := Some (Js.Global.setInterval (self.reduce (fun _ => Tick)) tickTimeInMs);
+    ipcOn "capture-taken" (fun _e image => self.reduce (setImage image) ());
     ReasonReact.NoUpdate
   },
-  render: fun {state: {total}} => {
-    let seconds = total / 1000;
-    let percentage = float_of_int (total / 100) /. 100.0;
-    let timesMessage = seconds == 1 ? "second" : "seconds";
-    let greeting = {j|$seconds $timesMessage|j};
-    /* if (seconds <= 0) {
-         <div> (ReasonReact.stringToElement "Uploaded") </div>
-       } else { */
-    <div className="upload">
-      <div
-        className="upload__progress"
-        style=(ReactDOMRe.Style.make transform::("scaleX(" ^ string_of_float percentage ^ ")") ())
-      />
-      <h1 className="upload__text"> (ReasonReact.stringToElement greeting) </h1>
-    </div>
-    /* } */
+  render: fun self => {
+    let isUploading =
+      switch self.state.image {
+      | Some _ => true
+      | None => false
+      };
+    let stop = self.reduce (fun _e => RemoveImage);
+    if isUploading {
+      <DelayUploadButton onCompleted=stop onCancelled=stop />
+    } else {
+      <div className="start">
+        <button className="start__button" onClick=(sendCommand "open-capture")>
+          (ReasonReact.stringToElement {js|＋|js})
+        </button>
+        <div className="channelSelect">
+          <button className="channelSelect__button" onClick=(sendCommand "expand-window")>
+            (ReasonReact.stringToElement "#general")
+            <span className="channelSelect__chevron">
+              (ReasonReact.stringToElement {js|▾|js})
+            </span>
+          </button>
+        </div>
+      </div>
+    }
   }
 };

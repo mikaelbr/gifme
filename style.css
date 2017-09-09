@@ -2,10 +2,40 @@
   margin: 0;
   padding: 0;
 }
+html {
+  font-size: 14px;
+  box-sizing: border-box;
+  font-family: 'Exo 2';
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+body {
+  user-select: none;
+  -webkit-app-region: drag;
+}
+button {
+  -webkit-app-region: no-drag;
+}
+.container {
+  display: flex;
+}
+.preview {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  z-index: 100;
+  background: red;
+}
+
 .upload {
   height: 64px;
-  width: 100%;
+  flex: auto;
+  align-items: stretch;
   position: relative;
+  border: 0;
   background-image: linear-gradient(
     90deg,
     #3023ae 0%,
@@ -13,13 +43,76 @@
     #d3ff84 100%
   );
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 300ms ease-in;
+  cursor: pointer;
+}
+.upload::after {
+  display: block;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: all 200ms ease-in;
+}
+.upload:hover::after {
+  opacity: 1;
+}
+.upload:hover .upload__text,
+.upload:hover .upload__tagline {
+  opacity: 0;
+}
+.upload:hover .upload__progress {
+  filter: sepia(0.2) brightness(0.7);
+}
+.upload:active {
+  filter: brightness(0.7);
+}
+.upload:active .upload__cancel {
+  text-shadow: none;
+}
+.upload__cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  transition: opacity 200ms ease-in;
+  color: white;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  z-index: 30;
+  opacity: 0;
+  cursor: pointer;
+}
+.upload:hover .upload__cancel {
+  opacity: 1;
 }
 .upload__text {
+  cursor: pointer;
   width: 100%;
   text-align: center;
   z-index: 20;
   position: relative;
   color: white;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  transition: all 300ms ease-out;
+}
+.upload__tagline {
+  font-size: 0.8rem;
+  text-align: center;
+  z-index: 20;
+  color: white;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  transition: all 300ms ease-out;
 }
 
 .upload__progress {
@@ -33,4 +126,75 @@
   transition: transform 100ms ease;
   background-image: linear-gradient(-134deg, #3023ae 0%, #c86dd7 100%);
   z-index: 10;
+}
+
+.uploaded {
+  height: 64px;
+  flex: auto;
+  align-items: stretch;
+  position: relative;
+  border: 0;
+  background-image: linear-gradient(
+    90deg,
+    #3023ae 0%,
+    #53a0fd 48%,
+    #d3ff84 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 300ms ease-in;
+}
+.uploaded__text {
+  text-align: center;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.start {
+  height: 64px;
+  display: flex;
+  align-content: stretch;
+}
+.start__button {
+  display: block;
+  width: 64px;
+  border: 0;
+  background-image: linear-gradient(-90deg, #3023ae 0%, #53a0fd 100%);
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  font-size: 4rem;
+  padding: 0;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 200ms ease-in;
+}
+.start__button:hover {
+  filter: saturate(3);
+  color: #ddd;
+}
+.channelSelect {
+  flex: auto;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  background-image: linear-gradient(-134deg, #3023ae 0%, #c86dd7 100%);
+}
+.channelSelect__button {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  font-size: 3rem;
+  font-family: 'Exo 2';
+  font-weight: bold;
+  display: flex;
+  flex: auto;
+  text-align: left;
+  align-items: center;
+  outline: none;
+}
+.channelSelect__chevron {
+  margin-left: auto;
+  font-size: 2rem;
 }
