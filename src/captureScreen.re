@@ -6,14 +6,47 @@ type recordStates =
 
 type state = {
   videoRef: ref (option Dom.element),
-  inState: recordStates
+  recordStream: option MediaRecorder.mediaRecorder,
+  inState: recordStates,
+  chunk: option Blob.t
 };
 
 let setSectionRef theRef {ReasonReact.state: state} => state.videoRef := Js.Null.to_opt theRef;
 
 type action =
-  | SetStream Navigator.mediaStream
-  | SetState recordStates;
+  | RecordingFinished
+  | SetStream Navigator.mediaStream MediaRecorder.mediaRecorder
+  | SetState recordStates
+  | SetRecord bool
+  | UpdateChunks Blob.t;
+
+let reducer action state =>
+  switch action {
+  | RecordingFinished => ReasonReact.SideEffects (fun _self => Js.log state.chunk)
+  | UpdateChunks chunk => ReasonReact.Update {...state, chunk: Some chunk}
+  | SetState status => ReasonReact.Update {...state, inState: status}
+  | SetRecord active =>
+    ReasonReact.SideEffects (
+      fun _self =>
+        switch (active, state.recordStream) {
+        | (true, Some s) => MediaRecorder.start s
+        | (false, Some s) => MediaRecorder.stop s
+        | _ => ()
+        }
+    )
+  | SetStream stream m =>
+    ReasonReact.UpdateWithSideEffects
+      {...state, recordStream: Some m}
+      (
+        fun _self =>
+          switch !state.videoRef {
+          | None => ()
+          | Some r =>
+            Video.setSrcObject r stream;
+            Video.onLoaded r (fun _ => Video.play r)
+          }
+      )
+  };
 
 let component = ReasonReact.reducerComponent "CaptureScreen";
 
@@ -22,25 +55,23 @@ let capturedButton onClick =>
 
 let make ::onComplete _children => {
   ...component,
-  initialState: fun () => {videoRef: ref None, inState: BeforeRecord},
-  reducer: fun action state =>
-    switch action {
-    | SetState status => ReasonReact.Update {...state, inState: status}
-    | SetStream stream =>
-      switch !state.videoRef {
-      | None => ()
-      | Some r =>
-        Video.setSrcObject r stream;
-        Video.onLoaded r (fun _ => Video.play r)
-      };
-      ReasonReact.NoUpdate
-    },
+  initialState: fun () => {
+    videoRef: ref None,
+    inState: BeforeRecord,
+    recordStream: None,
+    chunk: None
+  },
+  reducer,
   didMount: fun self => {
     let _f =
       Navigator.getUserMedia {"audio": false, "video": Navigator.Bool true} |>
       Js.Promise.then_ (
         fun stream => {
-          self.reduce (fun _ => SetStream stream) ();
+          let m = MediaRecorder.create_media_recorder stream;
+          MediaRecorder.ondataavailable
+            m (fun d => self.reduce (fun _ => UpdateChunks d##data) ());
+          MediaRecorder.onstop m (fun _ => self.reduce (fun _ => RecordingFinished) ());
+          self.reduce (fun _ => SetStream stream m) ();
           Js.Promise.resolve ()
         }
       );
@@ -48,16 +79,20 @@ let make ::onComplete _children => {
   },
   render: fun self => {
     let onRecordStart = self.reduce (fun _ => SetState CountdownRecord);
-    let onCountDownDone = self.reduce (fun _ => SetState IsRecording);
-    let stopRecording = self.reduce (fun _ => SetState DoneRecording);
+    let onCountDownDone _ => {
+      self.reduce (fun _ => SetState IsRecording) ();
+      self.reduce (fun _ => SetRecord true) ()
+    };
+    let stopRecording _ => {
+      self.reduce (fun _ => SetState DoneRecording) ();
+      self.reduce (fun _ => SetRecord false) ()
+    };
     switch self.state.inState {
     | DoneRecording =>
-      <div className="capture__doneRecording">
-        <h1> (ReasonReact.stringToElement "Is Recording") </h1>
-        <button onClick=(fun _ => onComplete ())>
-          (ReasonReact.stringToElement "Send recording")
-        </button>
-      </div>
+      switch self.state.chunk {
+      | Some chunk => <LoopChunk chunk onComplete />
+      | _ => <h1> (ReasonReact.stringToElement "Nope") </h1>
+      }
     | x =>
       <div>
         <video ref=(self.handle setSectionRef) />

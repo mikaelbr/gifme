@@ -1,6 +1,6 @@
 type mediaRecorder;
 
-type data = Js.t {. data : string};
+type data = Js.t {. data : Blob.t};
 
 external create_media_recorder : Navigator.mediaStream => mediaRecorder =
   "MediaRecorder" [@@bs.new];
