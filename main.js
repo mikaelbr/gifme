@@ -19,6 +19,7 @@ function createWindow() {
     backgroundColor: '#53A0FD',
     width,
     height,
+    vibrancy: 'appearance-based',
     frame: false,
     resizable: false
   });
@@ -77,6 +78,12 @@ ipcMain.on('open-capture', (event, arg) => {
     event.sender.send('capture-taken', arg);
   });
 
+  ipcMain.on('close-capture', (_, arg) => {
+    if (captureWindow) {
+      captureWindow.close();
+    }
+  });
+
   // and load the index.html of the app.
   captureWindow.loadURL(
     url.format({
@@ -89,6 +96,7 @@ ipcMain.on('open-capture', (event, arg) => {
   // Emitted when the window is closed.
   captureWindow.on('closed', function() {
     ipcMain.removeAllListeners('capture-taken');
+    ipcMain.removeAllListeners('close-capture');
     captureWindow = null;
   });
 });
