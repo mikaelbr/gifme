@@ -1,6 +1,9 @@
 let ipcSend = Electron.IpcRenderer.send Electron.ipcRenderer;
 
-let sendCapture _e => ipcSend "capture-taken" "capture content here";
+let sendCapture data => {
+  Js.log data;
+  ipcSend "capture-taken" data
+};
 
 let onClose _e => ipcSend "close-capture" "";
 

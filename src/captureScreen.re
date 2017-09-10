@@ -18,10 +18,12 @@ type action =
   | SetStream Navigator.mediaStream MediaRecorder.mediaRecorder
   | SetState recordStates
   | SetRecord bool
+  | Reset
   | UpdateChunks Blob.t;
 
 let reducer action state =>
   switch action {
+  | Reset => ReasonReact.Update {...state, chunk: None, inState: BeforeRecord}
   | RecordingFinished => ReasonReact.SideEffects (fun _self => Js.log state.chunk)
   | UpdateChunks chunk => ReasonReact.Update {...state, chunk: Some chunk}
   | SetState status => ReasonReact.Update {...state, inState: status}
@@ -53,6 +55,21 @@ let component = ReasonReact.reducerComponent "CaptureScreen";
 let capturedButton onClick =>
   <button onClick className="capture__record"> (ReasonReact.stringToElement {js|◉|js}) </button>;
 
+let startUserMedia (self: ReasonReact.self state ReasonReact.noRetainedProps action) => {
+  let _f =
+    Navigator.getUserMedia {"audio": false, "video": Navigator.Bool true} |>
+    Js.Promise.then_ (
+      fun stream => {
+        let m = MediaRecorder.create_media_recorder stream;
+        MediaRecorder.ondataavailable m (fun d => self.reduce (fun _ => UpdateChunks d##data) ());
+        MediaRecorder.onstop m (fun _ => self.reduce (fun _ => RecordingFinished) ());
+        self.reduce (fun _ => SetStream stream m) ();
+        Js.Promise.resolve ()
+      }
+    );
+  ()
+};
+
 let make ::onComplete _children => {
   ...component,
   initialState: fun () => {
@@ -62,21 +79,7 @@ let make ::onComplete _children => {
     chunk: None
   },
   reducer,
-  didMount: fun self => {
-    let _f =
-      Navigator.getUserMedia {"audio": false, "video": Navigator.Bool true} |>
-      Js.Promise.then_ (
-        fun stream => {
-          let m = MediaRecorder.create_media_recorder stream;
-          MediaRecorder.ondataavailable
-            m (fun d => self.reduce (fun _ => UpdateChunks d##data) ());
-          MediaRecorder.onstop m (fun _ => self.reduce (fun _ => RecordingFinished) ());
-          self.reduce (fun _ => SetStream stream m) ();
-          Js.Promise.resolve ()
-        }
-      );
-    ReasonReact.NoUpdate
-  },
+  didMount: fun _self => ReasonReact.SideEffects startUserMedia,
   render: fun self => {
     let onRecordStart = self.reduce (fun _ => SetState CountdownRecord);
     let onCountDownDone _ => {
@@ -87,10 +90,11 @@ let make ::onComplete _children => {
       self.reduce (fun _ => SetState DoneRecording) ();
       self.reduce (fun _ => SetRecord false) ()
     };
+    let reset _ => self.reduce (fun _ => Reset) ();
     switch self.state.inState {
     | DoneRecording =>
       switch self.state.chunk {
-      | Some chunk => <LoopChunk chunk onComplete />
+      | Some chunk => <PreviewConfirm chunk onComplete onCancel=reset />
       | _ => <h1> (ReasonReact.stringToElement "Nope") </h1>
       }
     | x =>

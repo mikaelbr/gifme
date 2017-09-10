@@ -310,3 +310,43 @@ button {
     transform: scale(1.1);
   }
 }
+
+.confirmBox button {
+  border: 5px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  z-index: 100;
+  padding: 0;
+  height: 50px;
+  width: 50px;
+
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 200ms ease-in;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.confirmBox button:first-child {
+  left: 40%;
+}
+.confirmBox button:last-child {
+  left: 60%;
+}
+
+.confirmBox button:hover {
+  transform-origin: center center;
+  transform: scale(1.1);
+  color: #ddd;
+}
+
+.confirmBox button:first-child:hover {
+  color: #dd2929;
+}
+.confirmBox button:last-child:hover {
+  color: #29dd7a;
+}
