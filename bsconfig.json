@@ -7,5 +7,5 @@
   "reason": { "react-jsx": 2 },
   "bsc-flags": ["-bs-super-errors"],
   "bs-dependencies": ["reason-react"],
-  "sources": ["src", "src/vendor"]
+  "sources": ["src", "src/vendor", "src/capture"]
 }
