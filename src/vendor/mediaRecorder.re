@@ -1,14 +1,13 @@
-type mediaRecorder;
+type t;
 
 type data = Js.t {. data : Blob.t};
 
-external create_media_recorder : Navigator.mediaStream => mediaRecorder =
-  "MediaRecorder" [@@bs.new];
+external create : Navigator.mediaStream => t = "MediaRecorder" [@@bs.new];
 
-external start : mediaRecorder => unit = "start" [@@bs.send];
+external start : t => unit = "start" [@@bs.send];
 
-external stop : mediaRecorder => unit = "stop" [@@bs.send];
+external stop : t => unit = "stop" [@@bs.send];
 
-external ondataavailable : mediaRecorder => (data => unit) => unit = "ondataavailable" [@@bs.set];
+external ondataavailable : t => (data => unit) => unit = "ondataavailable" [@@bs.set];
 
-external onstop : mediaRecorder => (data => unit) => unit = "onstop" [@@bs.set];
+external onstop : t => (data => unit) => unit = "onstop" [@@bs.set];

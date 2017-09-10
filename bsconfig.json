@@ -6,6 +6,6 @@
   "name": "gifme",
   "reason": { "react-jsx": 2 },
   "bsc-flags": ["-bs-super-errors"],
-  "bs-dependencies": ["reason-react"],
+  "bs-dependencies": ["reason-react", "bs-node"],
   "sources": ["src", "src/vendor", "src/capture"]
 }

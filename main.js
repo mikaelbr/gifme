@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain } = electron;
 
 const path = require('path');
 const url = require('url');
+const fs = require('fs');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -12,6 +13,25 @@ let captureWindow;
 const height = 64;
 const width = 325;
 const extendedTimes = 9;
+
+let storePath = path.join(__dirname, 'stored-videos');
+
+function getName() {
+  return String(new Date().getTime());
+}
+
+function storeFile(buffer) {
+  console.log(buffer);
+  // const buffer = new Buffer(binaryString);
+  const file = path.join(storePath, getName()) + '.webm';
+  fs.writeFile(file, buffer, {}, (err, res) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log('video saved');
+  });
+}
 
 function createWindow() {
   // Create the browser window.
@@ -74,6 +94,7 @@ ipcMain.on('open-capture', (event, arg) => {
     if (captureWindow) {
       captureWindow.close();
     }
+    // storeFile(arg);
     event.sender.send('capture-taken', arg);
   });
 

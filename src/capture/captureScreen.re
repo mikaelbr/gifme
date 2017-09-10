@@ -6,14 +6,14 @@ type recordStatus =
 
 type state = {
   stream: option Navigator.mediaStream,
-  recordStream: option MediaRecorder.mediaRecorder,
+  recordStream: option MediaRecorder.t,
   status: recordStatus,
   chunk: option Blob.t
 };
 
 type action =
   | RecordingFinished
-  | SetStream Navigator.mediaStream MediaRecorder.mediaRecorder
+  | SetStream Navigator.mediaStream MediaRecorder.t
   | SetStatus recordStatus
   | Reset
   | UpdateChunks Blob.t;

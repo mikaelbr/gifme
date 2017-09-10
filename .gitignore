@@ -3,3 +3,5 @@ node_modules
 .merlin
 npm-debug.log
 .DS_Store
+
+stored-videos/*.webm

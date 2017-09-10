@@ -10,7 +10,7 @@ let make ::chunk ::onComplete ::onCancel _children => {
       <video autoPlay=Js.true_ loop=Js.true_ src=url />
       <div className="confirmBox">
         <button onClick=(fun _ => onCancel ())> (ReasonReact.stringToElement {js|⟲|js}) </button>
-        <button onClick=(fun _ => onComplete url)>
+        <button onClick=(fun _ => onComplete chunk)>
           (ReasonReact.stringToElement {js|✔|js})
         </button>
       </div>

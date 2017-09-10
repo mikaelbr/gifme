@@ -21,7 +21,7 @@ let startUserMedia onData onStop onStreamReady {ReasonReact.state: state} => {
     Navigator.getUserMedia {"audio": false, "video": Navigator.Bool true} |>
     Js.Promise.then_ (
       fun stream => {
-        let m = MediaRecorder.create_media_recorder stream;
+        let m = MediaRecorder.create stream;
         MediaRecorder.ondataavailable m (fun d => onData d##data);
         MediaRecorder.onstop m onStop;
         onStreamReady stream m;
