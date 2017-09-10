@@ -9,9 +9,9 @@ let component = ReasonReact.reducerComponent "App";
 
 let setImage img _self => SetImage img;
 
-let ipcSend = Electron.IpcRenderer.send Electron.ipcRenderer;
+let ipcSend = Electron.IpcRenderer.send;
 
-let ipcOn = Electron.IpcRenderer.on Electron.ipcRenderer;
+let ipcOn = Electron.IpcRenderer.on;
 
 let sendCommand command _e => ipcSend command "foo";
 

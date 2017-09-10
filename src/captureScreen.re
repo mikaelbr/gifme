@@ -1,51 +1,44 @@
-type recordStates =
+type recordStatus =
   | BeforeRecord
   | CountdownRecord
   | IsRecording
   | DoneRecording;
 
 type state = {
-  videoRef: ref (option Dom.element),
+  stream: option Navigator.mediaStream,
   recordStream: option MediaRecorder.mediaRecorder,
-  inState: recordStates,
+  status: recordStatus,
   chunk: option Blob.t
 };
-
-let setSectionRef theRef {ReasonReact.state: state} => state.videoRef := Js.Null.to_opt theRef;
 
 type action =
   | RecordingFinished
   | SetStream Navigator.mediaStream MediaRecorder.mediaRecorder
-  | SetState recordStates
-  | SetRecord bool
+  | SetStatus recordStatus
   | Reset
   | UpdateChunks Blob.t;
 
 let reducer action state =>
   switch action {
-  | Reset => ReasonReact.Update {...state, chunk: None, inState: BeforeRecord}
-  | RecordingFinished => ReasonReact.SideEffects (fun _self => Js.log state.chunk)
-  | UpdateChunks chunk => ReasonReact.Update {...state, chunk: Some chunk}
-  | SetState status => ReasonReact.Update {...state, inState: status}
-  | SetRecord active =>
+  | Reset => ReasonReact.Update {...state, chunk: None, status: BeforeRecord}
+  | RecordingFinished =>
     ReasonReact.SideEffects (
-      fun _self =>
-        switch (active, state.recordStream) {
-        | (true, Some s) => MediaRecorder.start s
-        | (false, Some s) => MediaRecorder.stop s
+      fun self =>
+        switch self.state.recordStream {
+        | Some s => MediaRecorder.stop s
         | _ => ()
         }
     )
-  | SetStream stream m =>
+  | UpdateChunks chunk => ReasonReact.Update {...state, chunk: Some chunk}
+  | SetStream stream m => ReasonReact.Update {...state, recordStream: Some m, stream: Some stream}
+  | SetStatus status =>
     ReasonReact.UpdateWithSideEffects
-      {...state, recordStream: Some m}
+      {...state, status}
       (
-        fun _self =>
-          switch !state.videoRef {
-          | None => ()
-          | Some r =>
-            Video.setSrcObject r stream;
-            Video.onLoaded r (fun _ => Video.play r)
+        fun self =>
+          switch (status, self.state.recordStream) {
+          | (IsRecording, Some s) => MediaRecorder.start s
+          | _ => ()
           }
       )
   };
@@ -55,54 +48,33 @@ let component = ReasonReact.reducerComponent "CaptureScreen";
 let capturedButton onClick =>
   <button onClick className="capture__record"> (ReasonReact.stringToElement {js|◉|js}) </button>;
 
-let startUserMedia (self: ReasonReact.self state ReasonReact.noRetainedProps action) => {
-  let _f =
-    Navigator.getUserMedia {"audio": false, "video": Navigator.Bool true} |>
-    Js.Promise.then_ (
-      fun stream => {
-        let m = MediaRecorder.create_media_recorder stream;
-        MediaRecorder.ondataavailable m (fun d => self.reduce (fun _ => UpdateChunks d##data) ());
-        MediaRecorder.onstop m (fun _ => self.reduce (fun _ => RecordingFinished) ());
-        self.reduce (fun _ => SetStream stream m) ();
-        Js.Promise.resolve ()
-      }
-    );
-  ()
-};
+let id i _ => i;
 
 let make ::onComplete _children => {
   ...component,
-  initialState: fun () => {
-    videoRef: ref None,
-    inState: BeforeRecord,
-    recordStream: None,
-    chunk: None
-  },
+  initialState: fun () => {status: BeforeRecord, recordStream: None, stream: None, chunk: None},
   reducer,
-  didMount: fun _self => ReasonReact.SideEffects startUserMedia,
   render: fun self => {
-    let onRecordStart = self.reduce (fun _ => SetState CountdownRecord);
-    let onCountDownDone _ => {
-      self.reduce (fun _ => SetState IsRecording) ();
-      self.reduce (fun _ => SetRecord true) ()
-    };
-    let stopRecording _ => {
-      self.reduce (fun _ => SetState DoneRecording) ();
-      self.reduce (fun _ => SetRecord false) ()
-    };
-    let reset _ => self.reduce (fun _ => Reset) ();
-    switch self.state.inState {
+    let r a => self.reduce (id a);
+    let reset = r Reset;
+    let onData d => r (UpdateChunks d) ();
+    let onStop = r (SetStatus DoneRecording);
+    let stopRecording = r RecordingFinished;
+    let onCountDownDone = r (SetStatus IsRecording);
+    let startRecording = r (SetStatus CountdownRecord);
+    let onStreamReady stream m => r (SetStream stream m) ();
+    switch self.state.status {
     | DoneRecording =>
       switch self.state.chunk {
       | Some chunk => <PreviewConfirm chunk onComplete onCancel=reset />
       | _ => <h1> (ReasonReact.stringToElement "Nope") </h1>
       }
-    | x =>
+    | status =>
       <div>
-        <video ref=(self.handle setSectionRef) />
+        <VideoStream onData onStop onStreamReady />
         (
-          switch x {
-          | BeforeRecord => capturedButton onRecordStart
+          switch status {
+          | BeforeRecord => capturedButton startRecording
           | CountdownRecord =>
             <div className="capture__countdown"> <Countdown onCompleted=onCountDownDone /> </div>
           | IsRecording =>

@@ -1,7 +1,8 @@
 module IpcRenderer = {
   type t;
-  external send : t => string => string => unit = "" [@@bs.send];
-  external on : t => string => (unit => string => unit) => unit = "" [@@bs.send];
+  external ipcRenderer : t = "" [@@bs.scope "ipcRenderer"] [@@bs.module "electron"];
+  external send : string => string => unit =
+    "" [@@bs.scope "ipcRenderer"] [@@bs.module "electron"] [@@bs.val];
+  external on : string => (unit => string => unit) => unit =
+    "" [@@bs.scope "ipcRenderer"] [@@bs.module "electron"] [@@bs.val];
 };
-
-external ipcRenderer : IpcRenderer.t = "" [@@bs.module "electron"];

@@ -61,14 +61,13 @@ ipcMain.on('expand-window', (event, arg) => {
 
 ipcMain.on('open-capture', (event, arg) => {
   captureWindow = new BrowserWindow({
-    backgroundColor: '#53A0FD',
+    backgroundColor: '#000',
     width: 640,
     height: 480,
     frame: false,
     resizable: false,
     parent: mainWindow,
-    modal: true,
-    center: true
+    modal: true
   });
 
   ipcMain.on('capture-taken', (_, arg) => {

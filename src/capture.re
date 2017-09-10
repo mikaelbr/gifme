@@ -1,14 +1,8 @@
-let ipcSend = Electron.IpcRenderer.send Electron.ipcRenderer;
+let ipcSend = Electron.IpcRenderer.send;
 
-let sendCapture data => {
-  Js.log data;
-  ipcSend "capture-taken" data
-};
+let sendCapture data => ipcSend "capture-taken" data;
 
 let onClose _e => ipcSend "close-capture" "";
-
-type action =
-  | SetStream Navigator.mediaStream;
 
 let component = ReasonReact.statelessComponent "Capture";
 
