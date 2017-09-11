@@ -66,7 +66,7 @@ let make ::filename ::onCancelled ::onCompleted ::seconds=seconds _children => {
       onCancelled ();
       ()
     };
-    <div className="container">
+    <div className="start">
       <div className="preview"> <video src=filename autoPlay=Js.true_ loop=Js.true_ /> </div>
       (
         if (seconds <= 0) {

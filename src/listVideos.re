@@ -18,7 +18,7 @@ module VideoItem = {
     | None => ()
     | Some r => Video.pause r
     };
-  let make ::video _children => {
+  let make ::video ::onVideoSelect _children => {
     ...component,
     initialState: fun () => {videoRef: ref None, isPlaying: false},
     reducer: fun action state =>
@@ -37,8 +37,9 @@ module VideoItem = {
       };
       ReasonReact.NoUpdate
     },
-    render: fun self =>
-      <div className="videoItem">
+    render: fun self => {
+      let onClick _ => onVideoSelect video;
+      <div className="videoItem" onClick>
         <video
           ref=(self.handle setSectionRef)
           loop=Js.true_
@@ -46,17 +47,21 @@ module VideoItem = {
           src=video
         />
       </div>
+      /* <button className="videoItem__button" onClick>
+           (ReasonReact.stringToElement "Select")
+         </button> */
+    }
   };
 };
 
 let component = ReasonReact.statelessComponent "VideList";
 
-let make ::videos _children => {
+let make ::videos ::onVideoSelect _children => {
   ...component,
   render: fun _self =>
     <div className="videoList">
       (
-        videos |> Array.map (fun video => <VideoItem video key=video />) |> ReasonReact.arrayToElement
+        videos |> Array.map (fun video => <VideoItem onVideoSelect video key=video />) |> ReasonReact.arrayToElement
       )
     </div>
 };

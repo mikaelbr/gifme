@@ -1,5 +1,6 @@
 type action =
   | SetImage string
+  | UploadImage string
   | RemoveImage
   | ToggleExpand;
 
@@ -12,7 +13,7 @@ type state = {
 
 let component = ReasonReact.reducerComponent "App";
 
-let setImage img _self => SetImage img;
+let uploadImage img _self => UploadImage img;
 
 let ipcSend = Electron.IpcRenderer.send;
 
@@ -32,12 +33,13 @@ let make _children => {
   initialState: fun () => {image: None, isExpanded: false, existingVideos: [||]},
   reducer: fun action state =>
     switch action {
-    | SetImage str =>
+    | UploadImage str =>
       ReasonReact.Update {
         ...state,
         image: Some str,
         existingVideos: Array.append [|str|] state.existingVideos
       }
+    | SetImage str => ReasonReact.Update {...state, image: Some str}
     | RemoveImage => ReasonReact.Update {...state, image: None}
     | ToggleExpand =>
       ReasonReact.UpdateWithSideEffects
@@ -47,7 +49,7 @@ let make _children => {
     let existingVideos = getVideos ();
     ReasonReact.UpdateWithSideEffects
       {...self.state, existingVideos}
-      (fun _ => ipcOn "capture-taken" (fun _e image => self.reduce (setImage image) ()))
+      (fun _ => ipcOn "capture-taken" (fun _e image => self.reduce (uploadImage image) ()))
   },
   render: fun self => {
     let stop = self.reduce (fun _e => RemoveImage);
@@ -74,7 +76,10 @@ let make _children => {
         }
       )
       <div className=(className "addModule__channelList") />
-      <ListVideos videos=self.state.existingVideos />
+      <ListVideos
+        onVideoSelect=(self.reduce (fun img => SetImage img))
+        videos=self.state.existingVideos
+      />
     </div>
   }
 };

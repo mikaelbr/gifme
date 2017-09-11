@@ -10,7 +10,8 @@ const fs = require('fs');
 let mainWindow;
 let captureWindow;
 
-const height = 420;
+const minHeight = 300;
+const maxHeight = 600;
 const width = 325;
 
 let storePath = path.join(__dirname, 'stored-videos');
@@ -37,10 +38,11 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     backgroundColor: '#53A0FD',
     width,
-    height,
+    minHeight,
+    height: minHeight,
+    maxHeight,
     vibrancy: 'appearance-based',
-    frame: false,
-    resizable: false
+    frame: false
   });
 
   // and load the index.html of the app.

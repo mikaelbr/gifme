@@ -27,7 +27,7 @@ button {
   width: 85px;
   height: 64px;
   z-index: 100;
-  background: red;
+  background: #000;
 }
 .preview video {
   width: 100%;
@@ -391,6 +391,7 @@ button {
 .videoItem {
   position: relative;
   width: 50%;
+  cursor: pointer;
 }
 .videoItem video {
   width: 100%;
@@ -399,20 +400,10 @@ button {
 }
 .videoItem__button {
   position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  margin-left: -40px;
-  border: 5px solid #fff;
-  border-radius: 50%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: transparent;
-  color: #fff;
-  padding: 0;
-  height: 80px;
-  width: 80px;
-  margin: 0 5rem;
-  font-size: 3rem;
-  cursor: pointer;
-  transition: all 200ms ease-in;
-  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+  border: 0;
 }
