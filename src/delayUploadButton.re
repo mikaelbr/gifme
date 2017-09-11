@@ -30,7 +30,7 @@ let button text percentage onClick =>
     />
   </button>;
 
-let make ::onCancelled ::onCompleted ::seconds=seconds _children => {
+let make ::filename ::onCancelled ::onCompleted ::seconds=seconds _children => {
   ...component,
   initialState: fun () => {total: seconds * rest * tickTimeInMs, timerId: ref None},
   reducer: fun action state =>
@@ -66,17 +66,19 @@ let make ::onCancelled ::onCompleted ::seconds=seconds _children => {
       onCancelled ();
       ()
     };
-    if (seconds <= 0) {
-      <div className="container">
-        <div className="preview" />
-        <div className="uploaded">
-          <p className="uploaded__text">
-            (ReasonReact.stringToElement "Your gif has been uploaded")
-          </p>
-        </div>
-      </div>
-    } else {
-      <div className="container"> <div className="preview" /> (button text percentage click) </div>
-    }
+    <div className="container">
+      <div className="preview"> <video src=filename autoPlay=Js.true_ loop=Js.true_ /> </div>
+      (
+        if (seconds <= 0) {
+          <div className="uploaded">
+            <p className="uploaded__text">
+              (ReasonReact.stringToElement "Your gif has been uploaded")
+            </p>
+          </div>
+        } else {
+          button text percentage click
+        }
+      )
+    </div>
   }
 };

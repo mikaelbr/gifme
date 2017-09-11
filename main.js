@@ -10,9 +10,8 @@ const fs = require('fs');
 let mainWindow;
 let captureWindow;
 
-const height = 64;
+const height = 420;
 const width = 325;
-const extendedTimes = 9;
 
 let storePath = path.join(__dirname, 'stored-videos');
 
@@ -67,17 +66,6 @@ function createWindow() {
     mainWindow = null;
   });
 }
-
-let isExpanded = false;
-
-ipcMain.on('expand-window', (event, arg) => {
-  if (!isExpanded) {
-    mainWindow.setSize(width, extendedTimes * height, true);
-  } else {
-    mainWindow.setSize(width, height, true);
-  }
-  isExpanded = !isExpanded;
-});
 
 ipcMain.on('open-capture', (event, arg) => {
   captureWindow = new BrowserWindow({

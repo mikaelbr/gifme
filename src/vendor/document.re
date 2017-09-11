@@ -1,20 +1,21 @@
-type element;
+let window: Dom.element = [%bs.raw "window"];
 
-let window: element = [%bs.raw "window"];
+external createElement : string => Dom.element = "document.createElement" [@@bs.val];
 
-external createElement : string => element = "document.createElement" [@@bs.val];
+external appendChild : Dom.element => Dom.element = "document.body.appendChild" [@@bs.val];
 
-external appendChild : element => element = "document.body.appendChild" [@@bs.val];
-
-external addEventListener : element => string => (unit => unit) => unit =
+external addEventListener : Dom.element => string => (unit => unit) => unit =
   "addEventListener" [@@bs.send];
 
-external getWidth : element => int = "innerWidth" [@@bs.get];
+external removeEventListener : Dom.element => string => (unit => unit) => unit =
+  "removeEventListener" [@@bs.send];
 
-external getHeight : element => int = "innerHeight" [@@bs.get];
+external getWidth : Dom.element => int = "innerWidth" [@@bs.get];
 
-external setWidth : element => int => unit = "width" [@@bs.set];
+external getHeight : Dom.element => int = "innerHeight" [@@bs.get];
 
-external setHeight : element => int => unit = "height" [@@bs.set];
+external setWidth : Dom.element => int => unit = "width" [@@bs.set];
+
+external setHeight : Dom.element => int => unit = "height" [@@bs.set];
 
 external requestAnimationFrame : (unit => unit) => unit = "requestAnimationFrame" [@@bs.val];
