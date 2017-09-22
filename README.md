@@ -1,13 +1,3 @@
-This is a repo with examples usages of [ReasonReact](https://github.com/reasonml/reason-react).
-Have something you don't understand? Join us on [Discord](https://discord.gg/reasonml)!
+# gifme – Gif yourself to the world
 
-Run this project:
-
-```
-npm install
-npm start
-# in another tab
-npm run webpack
-```
-
-After you see the webpack compilation succeed (the `npm run webpack` step), open up the nested html files in `src/*` (**no server needed!**). Then modify whichever file in `src` and refresh the page to see the changes.
+Small application for recording yourself, creating a gif and posting it to a Slack Channel of your choice.
